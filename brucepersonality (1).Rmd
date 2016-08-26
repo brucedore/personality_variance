@@ -1,0 +1,120 @@
+---
+title: "Estimating Variability"
+author: "Bruce and Raphael"
+date: "August 25, 2016"
+output: html_document
+---
+##ESTIMATING VARIABILITY IN PERSONALITY ACROSS DIFFERENT UNIVERSITIES
+
+Katie Corker et al. wrote a paper on variability in Big 5 traits across universities —> https://osf.io/szek7/
+The data and code for Katie’s paper are available here —> https://osf.io/if7ug/
+
+They estimated that about 0.9% to 2.9% of the variance in personality is accounted for by university.
+I wanted to explore this data, and see if I could get a better estimate of the university-level variance in personality. 
+In this data, 8571 students from 30 universities completed a 20-item personality questionnaire that indexes the Big 5.
+That is, the data consist of 30 universities, 8571 students, 5 personality factors, and 20 questions (4 each per Big 5 factor).
+
+
+
+```{r, eval=FALSE}
+#load some packages
+library(reshape2)
+library(lme4)
+library(RCurl)
+library(stringi)
+#get the data
+x <- getURL("https://dl.dropboxusercontent.com/s/zsxa2a7vt5dy4vy/music_big5_anon.csv?dl=0", ssl.verifypeer = FALSE)
+music_big5_anon <- read.csv(text = x)
+attach(music_big5_anon)
+```
+
+####Paper models
+Corker et al. fit 5 separate models, one for each Big 5 factor.  (they used nlme) 
+
+```{r, eval=FALSE}
+#the models they fit look like this 
+o1 <-lmer(open ~ 1+ (1|univ), data=music_big5_anon) 
+c1 <-lmer(cons ~ 1+ (1|univ), data=music_big5_anon) 
+e1 <-lmer(extra ~ 1+ (1|univ), data=music_big5_anon) 
+a1 <-lmer(agree ~ 1+ (1|univ), data=music_big5_anon) 
+n1 <-lmer(neuro~ 1+ (1|univ), data=music_big5_anon) 
+```
+
+Corker et al. reported point estimates of the variance parameters for (1|univ) from each of these models with no confidence intervals.
+That is, they estimated that the variance attributable to university is about .006 to .016. (or 0.9% - 2.9% of the total variance). 
+
+```{r, eval=FALSE}
+#can use confint to generate CIs
+#note RMarkdown is not running any of this atm
+o1_ci<-confint(openness1,method="boot") 
+c1_ci<-confint(conscientiousness1,method="boot")
+e1_ci<-confint(extraversion1,method="boot")
+a1_ci<-confint(agreeableness1,method="boot"
+n1_ci<-confint(neuroticism1,method="boot") 
+```
+
+
+From this, it is clear that the extraversion and agreeableness point estimates are largest, but also estimated with the most uncertainty.
+Also, the confidence intervals across the 5 factors overlap a lot.
+It occured to me that we could get a more informed estimate of the university-to-university variance if we build one big model.
+
+###Combining into one model
+
+```{r,eval=FALSE}
+#making a long data frame (though i don’t actually use this here)
+big5<- data.frame(extra,agreeb,cons,neuro,open, univ,id)
+big5long<-melt(big5, id=c('univ','id'), value.name="score")
+
+#making a super long data frame, disaggregating responses to individual questions on the personality questionnaire
+#this data frame needs to have 8571 people * 20 items = 171420 rows
+#it also needs grouping variables encoding subject id, university, big 5 factor, and question number
+ex1=mipip01; ex2=mipip06; ex3=mipip11; ex4=mipip16; ag1=mipip02; ag2=mipip07; ag3=mipip12; ag4=mipip17; 
+co1=mipip03; co2=mipip08; co3=mipip13; co4=mipip18; ne1=mipip04; ne2=mipip09; ne3=mipip14; ne4=mipip19; 
+op1=mipip05; op2=mipip10; op3=mipip15; op4=mipip20;
+mipip<-data.frame(ex1,ex2,ex3,ex4,ag1,ag2,ag3,ag4,co1,co2,co3,co4,ne1,ne2,ne3,ne4,op1,op2,op3,op4, univ,id)
+mipiplong<-melt(mipip, id=c('univ','id'), value.name="score")
+mipiplong$question=mipiplong$variable #this encodes the question number variable, with 20 levels
+mipiplong$factor=stri_sub(mipiplong$variable, 1, -2)  #this encodes the big5 factor variable, with 5 levels
+```
+
+###Models
+I'm adding my thoughts here since a few of these seem wonky to me -RTG
+
+```{r, eval=FALSE}
+#note I flagged markdown to not run these because they take so long
+
+#start by treating subject as a random variable
+#this allows gives separate estimates for each factor, which can vary by sub
+m01 <-lmer(score ~ factor +  (factor|id), data=mipiplong)
+
+#same as above but allow estimaes to vary by university (this seems to be a bad fit because it has so many RE estimates)
+m02<-lmer(score ~ factor +  (factor|id)+ (factor | univ), data=mipiplong)
+
+#these don't pool any info about different personality scores (which is probably not terrible). factor is kind of a "random" (as opposed to mixed) grouping variable here
+
+#to allow for pooled estimation of each factor and student:
+m03<-lmer(score ~ 1 +  (1|id)+ (1|factor), data=mipiplong)
+
+#to pool variance across student, uni, and personality factor levels, we would do this:
+m04<-lmer(score ~ 1 +  (1|id)+ (1 | univ)+ (1|factor), data=mipiplong)
+
+#since there is so much data, pooling by question might also be reasonable
+m05<-lmer(score ~ 1 +  (1|id)+ (1 | univ)+ (1|factor)+(1|question), data=mipiplong)
+
+
+#compare by AIC and BIC
+AIC(m01,m02,m03,m04,m05);BIC(m01,m02,m03,m04,m05)
+
+```
+
+If you start adding things like (1|uni:factor) to the above you are modeling as if the levels of factor only make sense within a uni
+
+If you have (1| uni) (1| factor) AND (1|uni:factor), then i think you're doing something very weird
+
+Adding the combination of uni and factor means you are fitting extra predictions for each person for every university
+
+You already have that with the above models!
+--> but how do you get these? do you have to use predict()? with coef() you only get intercept for each of the random factors. 
+
+
+
