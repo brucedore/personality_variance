@@ -7,6 +7,7 @@ output: html_document
 ##ESTIMATING VARIABILITY IN PERSONALITY ACROSS DIFFERENT UNIVERSITIES
 
 Katie Corker et al. wrote a paper on variability in Big 5 traits across universities —> https://osf.io/szek7/
+...
 The data and code for Katie’s paper are available here —> https://osf.io/if7ug/
 
 They estimated that about 0.9% to 2.9% of the variance in personality is accounted for by university.
@@ -87,7 +88,7 @@ I'm adding my thoughts here since a few of these seem wonky to me -RTG
 #this allows gives separate estimates for each factor, which can vary by sub
 m01 <-lmer(score ~ factor +  (factor|id), data=mipiplong)
 
-#same as above but allow estimaes to vary by university (this seems to be a bad fit because it has so many RE estimates)
+#same as above but allow estimaes to vary by university 
 m02<-lmer(score ~ factor +  (factor|id)+ (factor | univ), data=mipiplong)
 
 #these don't pool any info about different personality scores (which is probably not terrible). factor is kind of a "random" (as opposed to mixed) grouping variable here
