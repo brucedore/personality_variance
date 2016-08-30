@@ -47,11 +47,11 @@ That is, they estimated that the variance attributable to university is about .0
 ```{r, eval=FALSE}
 #can use confint to generate CIs
 #note RMarkdown is not running any of this atm
-o1_ci<-confint(openness1,method="boot") 
-c1_ci<-confint(conscientiousness1,method="boot")
-e1_ci<-confint(extraversion1,method="boot")
-a1_ci<-confint(agreeableness1,method="boot"
-n1_ci<-confint(neuroticism1,method="boot") 
+o1_ci<-confint(o1,method="boot") 
+c1_ci<-confint(c1,method="boot")
+e1_ci<-confint(e1,method="boot")
+a1_ci<-confint(a1,method="boot"
+n1_ci<-confint(n1,method="boot") 
 ```
 
 O -- 0.006, 95%CI[0.002,0.012]
