@@ -33,7 +33,7 @@ attach(music_big5_anon)
 Corker et al. fit 5 separate models, one for each Big 5 factor.  (they used nlme) 
 
 ```{r, eval=FALSE}
-#the models they fit look like this 
+#they models they fit look like this 
 o1 <-lmer(open ~ 1+ (1|univ), data=music_big5_anon) 
 c1 <-lmer(cons ~ 1+ (1|univ), data=music_big5_anon) 
 e1 <-lmer(extra ~ 1+ (1|univ), data=music_big5_anon) 
