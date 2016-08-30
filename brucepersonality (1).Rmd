@@ -114,7 +114,7 @@ m04<-lmer(score ~ 1 +  (1|id)+ (1|factor), data=mipiplong)
 #to pool variance across student, uni, and personality factor levels, we would do this:
 m05<-lmer(score ~ 1 +  (1|id)+ (1 | univ)+ (1|factor), data=mipiplong)
 
-#since there is so much data, pooling by question might also be reasonable
+#include a random intercept for question
 m06<-lmer(score ~ 1 +  (1|id)+ (1 | univ)+ (1|factor)+(1|question), data=mipiplong)
 
 
