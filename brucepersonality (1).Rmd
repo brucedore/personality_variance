@@ -95,7 +95,7 @@ I'm adding my thoughts here since a few of these seem wonky to me -RTG
 
 #start by treating subject as a "random variable"" (data from different subs is partially pooled)
 #this allows gives separate estimates for each factor, which can vary by sub
-#BPD -- factor is a "fixed variable", but it can vary by id
+#factor is a "fixed variable", but it can vary by id
 m01 <-lmer(score ~ factor +  (factor|id), data=mipiplong)
 
 #same as above but allow estimaes to vary by university 
@@ -105,8 +105,8 @@ m02<-lmer(score ~ factor +  (factor|id)+ (factor | univ), data=mipiplong)
 m03<-lmer(score ~ factor +  (factor|id)+ (factor|univ) + (1|question), data=mipiplong)
 
 #these don't pool any info about different personality scores (which is probably not terrible). factor is kind of a "random" (as opposed to mixed) grouping variable here
-#BPD -- re: this not being terrible, i have some thoughts. on the one hand, the partial pooling vs no pooling of the OCEAN factors is no big deal for the OCEAN means in that they barely get shrunk towards their common average. however, it seems to matter more for the variance estimate in that we get a single variance estimate with a narrower CI (for the overall intercept), as opposed to five separate variance estimates with wider CIs (for each factor's coef)
-#BPD-- factor is a "random variable"  (data from different factors is partially pooled)
+#re: this not being terrible. on the one hand, the partial pooling vs no pooling of the OCEAN factors is no big deal for the OCEAN means in that they barely get shrunk towards their common average. however, it seems to matter more for the variance estimate in that we get a single variance estimate with a narrower CI (for the overall intercept), as opposed to five separate variance estimates with wider CIs (for each factor's coef)
+#factor is a "random variable"  (data from different factors is partially pooled)
 
 #to allow for pooled estimation of each factor and student:
 m04<-lmer(score ~ 1 +  (1|id)+ (1|factor), data=mipiplong)
