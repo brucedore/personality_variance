@@ -55,9 +55,13 @@ n1_ci<-confint(neuroticism1,method="boot")
 ```
 
 O -- 0.006, 95%CI[0.002,0.012]
+
 C -- 0.009, 95%CI[0.003,0.017]
+
 E -- 0.016, 95%CI[0.006,0.031]
+
 A -- 0.015, 95%CI[0.007,0.027]
+
 N -- 0.008, 95%CI[0.002,0.015]
 
 From this, it is clear that the extraversion and agreeableness point estimates are largest, but also estimated with the most uncertainty.
