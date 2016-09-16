@@ -24,7 +24,7 @@ library(lme4)
 library(RCurl)
 library(stringi)
 library(rstan)
-For execution on a local, multicore CPU with excess RAM we recommend calling
+
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 library(rstanarm)
