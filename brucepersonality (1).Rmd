@@ -23,6 +23,11 @@ library(reshape2)
 library(lme4)
 library(RCurl)
 library(stringi)
+library(rstan)
+For execution on a local, multicore CPU with excess RAM we recommend calling
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+library(rstanarm)
 #get the data
 x <- getURL("https://dl.dropboxusercontent.com/s/zsxa2a7vt5dy4vy/music_big5_anon.csv?dl=0", ssl.verifypeer = FALSE)
 music_big5_anon <- read.csv(text = x)
@@ -116,16 +121,6 @@ m04<-lmer(score ~ 1 +  (1|id)+ (1|factor), data=mipiplong)
 m05<-lmer(score ~ 1 +  (1|id)+ (1 | univ)+ (1|factor), data=mipiplong)
 
 
-norm_prior=normal(0,5)
-cov_prior=decov(regularization = 2)
-
-m_bayes_5_noint<-stan_lmer(score ~ 1 +  (1|id)+ (1 | univ)+ (1|factor),
-                           data=mipiplong,
-                           prior = norm_prior, prior_intercept = norm_prior, 
-                           prior_covariance = corr_prior,
-                           iter = 200,chains=2)
-
-
 #there was also the possibility of this one right? still not sure it makes sense
 m05b<-lmer(score ~ 1 +  (1|id)+ (1 | univ)+ (1|univ:factor), data=mipiplong)
 
@@ -159,14 +154,26 @@ m02_noint<-lmer(score ~ 0+op+co+ex+ag+ne +
                   (0+op+co+ex+ag+ne|id)+
                   (0+op+co+ex+ag+ne|univ) , data=mipiplong)
 
+#mipiplong_nona<-na.exclude(mipiplong)
+norm_prior=normal(0,5)
+cov_prior=decov(regularization = 2)
+
 m_bayes_2_noint<-stan_lmer(score ~ 0+op+co+ex+ag+ne +
                   (0+op+co+ex+ag+ne|id)+
                   (0+op+co+ex+ag+ne|univ) , data=mipiplong,
                   prior = norm_prior, prior_intercept = norm_prior, 
-                           prior_covariance = corr_prior,
+                           prior_covariance = cov_prior,
                   iter = 200,
-                  chains=2)
+                  chains=2);
+save(m_bayes_2_noint,file="m_bayes_2_noint")
 
+#partial pooling for personality factor
+m_bayes_5_noint<-stan_lmer(score ~ 1 +  (1|id)+ (1 | univ)+ (1|factor),
+                           data=mipiplong,
+                           prior = norm_prior, prior_intercept = norm_prior, 
+                           prior_covariance = corr_prior,
+                           iter = 200,chains=2)
+save(m_bayes_5_noint,file="m_bayes_2_noint")
 
 m03_noint<-lmer(score ~ 0+op+co+ex+ag+ne +
                   (0+op+co+ex+ag+ne|id)+
