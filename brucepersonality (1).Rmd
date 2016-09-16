@@ -115,6 +115,17 @@ m04<-lmer(score ~ 1 +  (1|id)+ (1|factor), data=mipiplong)
 #to pool variance across student, uni, and personality factor levels, we would do this:
 m05<-lmer(score ~ 1 +  (1|id)+ (1 | univ)+ (1|factor), data=mipiplong)
 
+
+norm_prior=normal(0,5)
+cov_prior=decov(regularization = 2)
+
+m_bayes_5_noint<-stan_lmer(score ~ 1 +  (1|id)+ (1 | univ)+ (1|factor),
+                           data=mipiplong,
+                           prior = norm_prior, prior_intercept = norm_prior, 
+                           prior_covariance = corr_prior,
+                           iter = 200,chains=2)
+
+
 #there was also the possibility of this one right? still not sure it makes sense
 m05b<-lmer(score ~ 1 +  (1|id)+ (1 | univ)+ (1|univ:factor), data=mipiplong)
 
@@ -147,6 +158,15 @@ m01_noint<-lmer(score ~ 0+op+co+ex+ag+ne +
 m02_noint<-lmer(score ~ 0+op+co+ex+ag+ne +
                   (0+op+co+ex+ag+ne|id)+
                   (0+op+co+ex+ag+ne|univ) , data=mipiplong)
+
+m_bayes_2_noint<-stan_lmer(score ~ 0+op+co+ex+ag+ne +
+                  (0+op+co+ex+ag+ne|id)+
+                  (0+op+co+ex+ag+ne|univ) , data=mipiplong,
+                  prior = norm_prior, prior_intercept = norm_prior, 
+                           prior_covariance = corr_prior,
+                  iter = 200,
+                  chains=2)
+
 
 m03_noint<-lmer(score ~ 0+op+co+ex+ag+ne +
                   (0+op+co+ex+ag+ne|id)+
